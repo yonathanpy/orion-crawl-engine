@@ -1,156 +1,160 @@
 # Orion Crawl Engine
 
-Orion Crawl Engine is an asynchronous web crawling framework implemented in Python.  
-The project focuses on demonstrating the internal architecture of a scalable crawler system including URL frontier management, concurrent page retrieval, HTML parsing pipelines, and persistent storage.
+Orion Crawl Engine is an asynchronous web crawling framework implemented in Python. The project is designed to explore the architecture of scalable crawling systems used for large scale information retrieval and automated data acquisition.
 
-The design separates networking, crawling coordination, processing pipelines, and storage components into independent modules.
+The repository focuses on the internal structure of a crawler rather than simple page downloading. The system separates networking, URL scheduling, worker orchestration, document processing, and storage into independent layers. This separation allows the crawler to be extended, scaled, or modified without altering core components.
 
-The repository serves as a reference implementation for studying crawler architecture and distributed data collection systems.
+The implementation demonstrates common crawler design patterns used in distributed data collection systems and search engine pipelines.
 
 ---
 
-# System Architecture
+# System Overview
 
-The crawler follows a modular layered architecture.
+The crawler operates as a pipeline composed of several independent subsystems. Each subsystem performs a specific task in the crawling lifecycle.
 
 ```
 Seed URL
    │
-Frontier Manager
+URL Frontier
    │
-Worker Pool
+Scheduler
    │
-Network Fetch Layer
+Worker Runtime
    │
-HTML Parsing
+HTTP Fetch Layer
    │
-Processing Pipeline
+HTML Parser
    │
-Storage Repository
+Content Processing Pipeline
+   │
+Persistent Storage
 ```
 
-Each component is designed to remain independent and replaceable.
+The architecture allows the crawler to scale by increasing worker concurrency while maintaining centralized URL management.
 
 ---
 
-# Core Components
+# Core Subsystems
 
 ## Crawl Engine
 
-The engine coordinates the full crawling lifecycle.  
-It initializes the frontier, manages worker processes, and controls the event loop responsible for concurrent operations.
+The crawl engine coordinates the lifecycle of the crawling process. It initializes all subsystems and manages the asynchronous runtime environment.
 
-Responsibilities:
+Responsibilities include:
 
-- bootstrap crawl session
-- manage worker lifecycle
-- coordinate frontier scheduling
-- maintain crawl limits and runtime configuration
+- initializing the URL frontier
+- spawning the worker pool
+- maintaining runtime configuration
+- coordinating crawl execution
+
+The engine operates on top of the Python asyncio runtime, enabling efficient concurrent network operations.
 
 ---
 
 ## URL Frontier
 
-The frontier is responsible for scheduling URLs that still need to be crawled.
+The URL frontier manages the queue of URLs waiting to be crawled. It acts as the scheduler responsible for determining which resources should be fetched next.
 
-Features:
+The frontier implements the following mechanisms:
 
-- asynchronous queue
-- URL deduplication
-- fingerprint based uniqueness
-- scalable queue abstraction
+- asynchronous queue scheduling
+- URL fingerprint deduplication
+- visited resource tracking
+- safe concurrent queue access
 
-The frontier ensures that each unique resource is visited only once.
+Deduplication is implemented using hashed URL fingerprints to ensure that identical resources are not crawled multiple times.
 
 ---
 
-## Worker Pool
+## Worker Runtime
 
-The worker pool manages multiple asynchronous workers responsible for retrieving pages and discovering new links.
+The worker runtime executes multiple concurrent crawling workers. Each worker retrieves URLs from the frontier, fetches remote content, and extracts additional links.
 
-Each worker performs the following sequence:
+Worker execution cycle:
 
 1. request next URL from frontier
-2. download HTML document
-3. process page content
-4. extract hyperlinks
-5. submit discovered links back to frontier
+2. perform asynchronous HTTP request
+3. validate response
+4. parse HTML document
+5. process extracted data
+6. submit discovered links to frontier
 
-Workers operate concurrently using Python's asyncio runtime.
+Workers operate as asynchronous tasks managed by the event loop.
 
 ---
 
 ## Network Fetch Layer
 
-The fetch layer performs HTTP retrieval operations.
+The network layer performs HTTP communication with remote servers. It handles connection management, request scheduling, and response retrieval.
 
-Key aspects:
+Key properties include:
 
 - asynchronous HTTP requests
-- request timeout control
-- response validation
-- error isolation
+- connection timeout handling
+- response status validation
+- network error isolation
 
-This layer is implemented using aiohttp to support concurrent network operations.
+The implementation uses aiohttp to support concurrent network operations without blocking the event loop.
 
 ---
 
-## HTML Parsing Layer
+## HTML Parsing System
 
-Downloaded documents are parsed to extract structured information.
+The parsing layer converts raw HTML documents into structured representations.
 
-Parsing includes:
+Processing operations include:
 
 - document title extraction
 - hyperlink discovery
-- raw text extraction
-- metadata preparation
+- raw textual content extraction
+- metadata collection
 
-BeautifulSoup is used as the HTML parsing backend.
-
----
-
-## Processing Pipeline
-
-The processing pipeline transforms raw HTML into structured data records.
-
-Responsibilities:
-
-- page metadata extraction
-- text normalization
-- structured document creation
-- pipeline extension hooks
-
-The pipeline architecture allows additional processing stages to be inserted.
+HTML parsing is performed using BeautifulSoup which provides flexible document traversal and extraction capabilities.
 
 ---
 
-## Storage Layer
+## Content Processing Pipeline
 
-The storage layer persists crawled content.
+After parsing, documents are passed through a processing pipeline responsible for transforming raw page data into structured records.
 
-The default implementation uses SQLite for simplicity, though the architecture allows other storage backends.
+Processing stages include:
+
+- metadata extraction
+- content normalization
+- document structuring
+- optional transformation hooks
+
+The pipeline architecture allows additional processing modules to be added without modifying the crawler core.
+
+---
+
+## Persistent Storage Layer
+
+The storage layer persists crawled content and metadata. The current implementation uses SQLite for simplicity and portability.
 
 Stored attributes include:
 
 - page URL
 - page title
-- extracted textual content
+- extracted text
+- crawl timestamp
+
+The storage module is designed to be replaceable with more advanced backends such as document stores or distributed databases.
 
 ---
 
 # Concurrency Model
 
-The crawler uses an event driven concurrency model built on top of Python asyncio.
+The crawler uses an event driven concurrency model based on Python's asyncio framework.
 
-Key benefits:
+Advantages of this model include:
 
-- efficient I/O utilization
-- non blocking network operations
-- scalable worker model
-- simplified concurrency control
+- efficient handling of network I/O
+- reduced thread overhead
+- scalable worker concurrency
+- simplified asynchronous programming model
 
-Workers run as asynchronous tasks managed by the event loop.
+Each worker runs as a coroutine that interacts with the shared URL frontier.
 
 ---
 
@@ -161,6 +165,7 @@ crawler/
     engine.py
     frontier.py
     worker_pool.py
+    scheduler.py
 
 network/
     fetcher.py
@@ -176,6 +181,8 @@ utils/
     url_tools.py
     fingerprint.py
 ```
+
+Each module is isolated and can be extended independently.
 
 ---
 
@@ -204,25 +211,27 @@ Start a crawl session using a seed URL.
 python run.py https://example.com
 ```
 
-Configuration parameters include:
+Optional parameters allow configuration of:
 
 - worker pool size
-- crawl limit
+- crawl depth
 - request timeout
+- frontier queue size
 
 ---
 
 # Potential Extensions
 
-The architecture allows several advanced extensions.
+The system architecture allows many advanced extensions.
 
 Examples include:
 
-- distributed crawling across multiple nodes
-- advanced URL prioritization algorithms
-- politeness policies and domain throttling
-- document indexing systems
-- machine learning based content classification
+- distributed crawling clusters
+- URL prioritization algorithms
+- domain politeness policies
+- content indexing systems
+- machine learning based document classification
+- large scale document storage systems
 
 ---
 
@@ -234,4 +243,5 @@ MIT License
 
 # Author
 
-Yonathan,aka Witwizard
+Yonathan  
+aka Witwizard
