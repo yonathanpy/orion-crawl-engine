@@ -1,7 +1,8 @@
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/npm/simple-icons@v16/icons/python.svg" width="256" height="256" alt="Orion Crawl Engine Logo" />
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:220000,100:330000&height=180&section=header&text=ORION-CRAWL-ENGINE🕷️Crawler+Suite&fontSize=60&fontColor=ff4400&desc=Witwizard&descSize=18&descColor=cccccc" />
 </p>
 
+# ORION‑CRAWL‑ENGINE
 
 
 Orion Crawl Engine is an asynchronous web crawling framework implemented in Python. The project is designed to explore the architecture of scalable crawling systems used for large scale information retrieval and automated data acquisition.
