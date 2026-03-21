@@ -1,6 +1,8 @@
+<!-- ORION-CRAWL-ENGINE Banner -->
 <p align="center">
-  <img src="https://img.icons8.com/fluency/512/search.png" width="200" alt="ORION-CRAWL-ENGINE" />
+  <img src="https://img.icons8.com/fluency/256/search.png" width="200" alt="ORION-CRAWL-ENGINE" />
 </p>
+
 
 # ORION‑CRAWL‑ENGINE
 
