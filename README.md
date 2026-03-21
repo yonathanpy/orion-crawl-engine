@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=rect&color=0:220000,100:330000&height=180&section=header&text=ORION-CRAWL-ENGINE🕷️Crawler+Suite&fontSize=60&fontColor=ff4400&desc=Witwizard&descSize=18&descColor=cccccc" />
+  <img src="https://img.icons8.com/ios-filled/256/000000/magnifying-glass.png" width="200" alt="ORION‑CRAWL‑ENGINE Search Icon"/>
 </p>
+
 
 # ORION‑CRAWL‑ENGINE
 
